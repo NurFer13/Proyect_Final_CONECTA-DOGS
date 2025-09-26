@@ -439,9 +439,8 @@ def create_token():
             return {"code": 400, "msg": "Introduzca un email o una contraseña"}
 
         # Consulta la base de datos por el nombre de usuario y la contraseña
-        # user = User.filter.query(email=email).first()                   # No sé como hacer esta query segun el metodo de la academia
         query = db.session.query(User).filter(User.email == email)
-        user = db.session.execute(query).scalars().one()
+        user = db.session.execute(query).scalars().first()
 
         if user == None:        # user is None
             # el usuario no se encontró en la base de datos
@@ -450,16 +449,18 @@ def create_token():
 
         if password == user.password:
             # crea un nuevo token con la info del usuario y us id dentro
-            query = db.select(Tariffs).filter_by(user_id=user.id)
-            user_tariffs = db.session.execute(query).scalars()
+            try:
+                query = db.select(Tariffs).filter_by(user_id=user.id)
+                user_tariffs = db.session.execute(query).scalars()
+                serialize_tariffs = [tariff.serialize_books() for tariff in user_tariffs]
+            except Exception:
+                serialize_tariffs = []
 
-            serialize_tariffs = [tariff.serialize_books() for tariff in user_tariffs]
+            user_data = user.serialize()
+            user_data["book_to"] = serialize_tariffs
 
-            user = user.serialize()
-            user["book_to"] = serialize_tariffs
-
-            access_token = create_access_token(identity=user)
-            return jsonify({"code": 200, "msg": "Inicio de sesión correcto", "token": access_token, "user": user })
+            access_token = create_access_token(identity=user_data)
+            return jsonify({"code": 200, "msg": "Inicio de sesión correcto", "token": access_token, "user": user_data })
         else:
             return jsonify({"msg": "Error en el email o en la contraseña"}), 401
 

@@ -2,6 +2,10 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 from flask import Flask, request, jsonify, url_for, send_from_directory, render_template
 from flask_basicauth import BasicAuth
 from flask_jwt_extended import JWTManager
@@ -56,6 +60,7 @@ with app.app_context():
 
 #  Configura la extensión Flask-JWT-Extended
 app.config["JWT_SECRET_KEY"] = os.environ.get('JWT_SECRET') # ESTA PALABRA GENERA LOS TOKENS UNICOS Y NO SE DEBE COMPARTIR!!!           (# ¡Cambia las palabras "super-secret" por otra cosa!)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False  # Tokens never expire (for development)
 jwt = JWTManager(app)                                       # SE PONE EN ENV PARA NO SUBIRSE A LA NUBE Y QUE SEA SECRETA
 
 # Allow CORS requests to this API

@@ -19,13 +19,31 @@ def setup_commands(app):
     def insert_test_data(count):
         print("Creating test users")
         for x in range(1, int(count) + 1):
+            email = "test_user" + str(x) + "@test.com"
+            # Check if user already exists
+            existing_user = User.query.filter_by(email=email).first()
+            if existing_user:
+                print(f"User {email} already exists, skipping...")
+                continue
+                
             user = User()
-            user.email = "test_user" + str(x) + "@test.com"
+            user.email = email
             user.password = "123456"
+            user.name = "Test User " + str(x)
+            user.lastName = "Last Name " + str(x)
+            user.address = "Test Address " + str(x)
+            user.province = "Test Province"
+            user.postalCode = 12345
+            user.phone = 123456789
+            user.country = "Test Country"
+            user.aboutMe = "Test user description"
+            user.birthdate = "1990-01-01"
+            user.userPhoto = "https://via.placeholder.com/150"
             user.is_active = True
             db.session.add(user)
-            db.session.commit()
             print("User: ", user.email, " created.")
+        
+        db.session.commit()
 
         print("All test users created")
 
